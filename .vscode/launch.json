@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MicroserviceAuthApplication<microservice-auth>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.rolapet.microservice_auth.MicroserviceAuthApplication",
+            "projectName": "microservice-auth",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

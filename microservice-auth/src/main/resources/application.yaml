@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: "jdbc:sqlserver://databasesqlprueba1.database.windows.net:1433;database=base1;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
+    username: adminsql
+    password: Enano0301
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: "SECRETO_ULTRA_LARGO_DE_MINIMO_32_CARACTERES_12345678"
+  expiration: 3600000
+
