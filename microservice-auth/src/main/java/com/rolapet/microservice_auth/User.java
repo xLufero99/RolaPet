@@ -1,6 +1,8 @@
 package com.rolapet.microservice_auth;
+
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
@@ -22,6 +24,15 @@ public class User {
 
     private String password;
 
+    private String identification;
+    private LocalDate birthDate;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    @Builder.Default
+    private boolean active = true;
+    
+    @Builder.Default
+    private boolean verified = false;
 }
