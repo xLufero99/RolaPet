@@ -4,5 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
-    List<Vehicle> findByUserProfileId(Long userProfileId);
+    // CAMBIAR ESTO: usar 'userProfile.id' en lugar de 'userProfileId'
+    List<Vehicle> findByUserProfile_Id(Long userProfileId);
 }

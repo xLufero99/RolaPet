@@ -1,38 +1,75 @@
 package com.rolapet.microservice_auth;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Entity
-@Table(name = "users")
-@Getter
-@Setter
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Collection;
+import java.util.List;
+
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class User {
-
+@Entity
+@Table(name = "_user")
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-
-    @Column(unique = true, nullable = false)
+    private Integer id;
+    
+    @Column(unique = true)
     private String email;
-
     private String password;
-
-    private String identification;
-    private LocalDate birthDate;
-
+    
+    @Column(unique = true)
+    private String cedula;
+    
+    private LocalDate fechaNacimiento;
+    private String nombreAcudiente; // Opcional - puede ser null
+    
     @Enumerated(EnumType.STRING)
     private Role role;
-    
-    @Builder.Default
-    private boolean active = true;
-    
-    @Builder.Default
-    private boolean verified = false;
+
+    // Método para calcular si es menor de edad
+    public boolean esMenorDeEdad() {
+        return Period.between(fechaNacimiento, LocalDate.now()).getYears() < 18;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

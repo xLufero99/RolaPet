@@ -1,13 +1,19 @@
 package com.rolapet.microservice_auth;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RegisterRequest {
-    private String name;
     private String email;
     private String password;
-    private String identification;
-    private LocalDate birthDate;  // ← Con esto se calcula documentType automáticamente
+    private String cedula;
+    private LocalDate fechaNacimiento;
+    private String nombreAcudiente; // Opcional - solo para menores de edad
 }

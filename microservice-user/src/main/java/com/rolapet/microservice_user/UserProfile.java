@@ -41,7 +41,6 @@ public class UserProfile {
     @JsonIgnore
     private List<Vehicle> vehicles = new ArrayList<>();
 
-    // CALCULA AUTOMÁTICAMENTE CC/TI SEGÚN EDAD
     public DocumentType calculateDocumentType() {
         if (this.birthDate == null) return DocumentType.CC;
         
@@ -49,7 +48,6 @@ public class UserProfile {
         return age >= 18 ? DocumentType.CC : DocumentType.TI;
     }
 
-    // SE EJECUTA ANTES DE GUARDAR EN BD
     @PrePersist
     @PreUpdate
     private void setDocumentTypeFromAge() {
@@ -66,8 +64,4 @@ public class UserProfile {
         vehicles.add(vehicle);
         vehicle.setUserProfile(this);
     }
-}
-
-enum DocumentType {
-    CC, TI
 }

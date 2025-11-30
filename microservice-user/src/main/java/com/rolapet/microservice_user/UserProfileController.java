@@ -1,6 +1,7 @@
 package com.rolapet.microservice_user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -12,39 +13,45 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     
     @PostMapping("/profile")
-    public UserProfile createProfile(@RequestBody UserProfile userProfile) {
+    public UserProfile createProfile(@RequestBody UserProfile userProfile, Authentication authentication) {
+        String authUserId = authentication.getName();
+        userProfile.setAuthUserId(authUserId);
         return userProfileService.createUserProfile(userProfile);
     }
     
-    @GetMapping("/profile/{authUserId}")
-    public UserProfile getProfile(@PathVariable String authUserId) {
+    @GetMapping("/profile/my-profile")
+    public UserProfile getMyProfile(Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.getUserProfileByAuthId(authUserId);
     }
     
-    @PutMapping("/profile/{authUserId}")
-    public UserProfile updateProfile(@PathVariable String authUserId, @RequestBody UserProfile userProfile) {
+    @PutMapping("/profile/my-profile")
+    public UserProfile updateMyProfile(@RequestBody UserProfile userProfile, Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.updateUserProfile(authUserId, userProfile);
     }
     
-    @PostMapping("/profile/{authUserId}/vehicles")
-    public Vehicle addVehicle(@PathVariable String authUserId, @RequestBody Vehicle vehicle) {
+    @PostMapping("/profile/my-profile/vehicles")
+    public Vehicle addVehicle(@RequestBody Vehicle vehicle, Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.addVehicleToUser(authUserId, vehicle);
     }
     
-    @GetMapping("/profile/{authUserId}/vehicles")
-    public List<Vehicle> getUserVehicles(@PathVariable String authUserId) {
+    @GetMapping("/profile/my-profile/vehicles")
+    public List<Vehicle> getMyVehicles(Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.getUserVehicles(authUserId);
     }
     
-    // NUEVO: Endpoint para ver tipo de documento
-    @GetMapping("/profile/{authUserId}/document-type")
-    public String getDocumentType(@PathVariable String authUserId) {
+    @GetMapping("/profile/my-profile/document-type")
+    public String getMyDocumentType(Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.getDocumentType(authUserId);
     }
     
-    // NUEVO: Endpoint para verificar mayoría de edad
-    @GetMapping("/profile/{authUserId}/is-adult")
-    public boolean isAdult(@PathVariable String authUserId) {
+    @GetMapping("/profile/my-profile/is-adult")
+    public boolean amIAdult(Authentication authentication) {
+        String authUserId = authentication.getName();
         return userProfileService.isAdult(authUserId);
     }
 }

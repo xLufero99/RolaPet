@@ -12,6 +12,9 @@ public class UserProfileService {
     private final VehicleRepository vehicleRepository;
     
     public UserProfile createUserProfile(UserProfile userProfile) {
+        if (userProfileRepository.findByAuthUserId(userProfile.getAuthUserId()).isPresent()) {
+            throw new RuntimeException("Ya existe un perfil para este usuario");
+        }
         return userProfileRepository.save(userProfile);
     }
     
@@ -23,33 +26,42 @@ public class UserProfileService {
     public UserProfile updateUserProfile(String authUserId, UserProfile updatedProfile) {
         UserProfile existingProfile = getUserProfileByAuthId(authUserId);
         
-        existingProfile.setName(updatedProfile.getName());
-        existingProfile.setPhone(updatedProfile.getPhone());
-        existingProfile.setAddress(updatedProfile.getAddress());
-        existingProfile.setVerified(updatedProfile.isVerified());
+        if (updatedProfile.getName() != null) {
+            existingProfile.setName(updatedProfile.getName());
+        }
+        if (updatedProfile.getPhone() != null) {
+            existingProfile.setPhone(updatedProfile.getPhone());
+        }
+        if (updatedProfile.getAddress() != null) {
+            existingProfile.setAddress(updatedProfile.getAddress());
+        }
+        if (updatedProfile.getBirthDate() != null) {
+            existingProfile.setBirthDate(updatedProfile.getBirthDate());
+        }
+        if (updatedProfile.getIdentification() != null) {
+            existingProfile.setIdentification(updatedProfile.getIdentification());
+        }
         
         return userProfileRepository.save(existingProfile);
     }
     
     public Vehicle addVehicleToUser(String authUserId, Vehicle vehicle) {
         UserProfile userProfile = getUserProfileByAuthId(authUserId);
-        userProfile.addVehicle(vehicle);
-        userProfileRepository.save(userProfile);
-        return vehicle;
+        vehicle.setUserProfile(userProfile);
+        return vehicleRepository.save(vehicle);
     }
     
     public List<Vehicle> getUserVehicles(String authUserId) {
-        UserProfile userProfile = getUserProfileByAuthId(authUserId);
-        return userProfile.getVehicles();
-    }
+    UserProfile userProfile = getUserProfileByAuthId(authUserId);
+    // CAMBIAR: usar el método corregido
+    return vehicleRepository.findByUserProfile_Id(userProfile.getId());
+}
     
-    // NUEVO: Obtener tipo de documento calculado
     public String getDocumentType(String authUserId) {
         UserProfile userProfile = getUserProfileByAuthId(authUserId);
         return userProfile.getDocumentType().name();
     }
     
-    // NUEVO: Verificar si es mayor de edad
     public boolean isAdult(String authUserId) {
         UserProfile userProfile = getUserProfileByAuthId(authUserId);
         return userProfile.isAdult();
