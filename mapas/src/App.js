@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
       <header className="header">
-        <h1>🗺️ Mapas Bogotá</h1>
+        <h1>🗺️ RolaPet</h1>
         <p>Visualización de mapas base y búsqueda de direcciones</p>
       </header>
       <main>

@@ -198,8 +198,8 @@ function Cabecera({ busqueda, setBusqueda, buscarDireccion, center, onSelecciona
   return (
     <div className="controles-superiores">
       <div className="logo">
-        <h2>🗺️ Mapas Bogotá</h2>
-        <small>API v1.0.0</small>
+        <h2>🗺️ RolaPet</h2>
+        <small>API v.1 By lufero</small>
         {cargando && <div className="cargando-indicador">Buscando en 6 servicios...</div>}
       </div>
       
