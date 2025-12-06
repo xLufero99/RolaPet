@@ -1,0 +1,35 @@
+/* Reset y base */
+.mapa-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.contenedor-principal {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ÁREA DEL MAPA */
+.mapa-area {
+  flex: 1;
+  position: relative;
+  background: #e0e0e0;
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* REMOVER CONTROLES DE LEAFLET POR DEFECTO */
+.leaflet-control-container .leaflet-top.leaflet-left {
+  display: none !important;
+}
+
