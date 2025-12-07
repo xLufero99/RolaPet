@@ -1,0 +1,565 @@
+/* PanelRuteo.css */
+.panel-ruteo-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.panel-ruteo-contenido {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.panel-ruteo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  border-radius: 20px 20px 0 0;
+  color: white;
+}
+
+.panel-ruteo-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-cerrar {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.btn-cerrar:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.panel-ruteo-body {
+  padding: 25px;
+}
+
+.ruteo-grupo {
+  margin-bottom: 25px;
+}
+
+.ruteo-grupo label {
+  display: block;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ruteo-destino {
+  background: #f8f9fa;
+  border: 2px solid #eaeaea;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 5px;
+}
+
+.ruteo-destino strong {
+  display: block;
+  color: #2c3e50;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.ruteo-destino small {
+  color: #7f8c8d;
+  font-size: 13px;
+  display: block;
+  line-height: 1.4;
+}
+
+.origen-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.origen-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: left;
+  font-size: 14px;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.origen-btn:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.origen-btn.activo {
+  background: #e8f4fc;
+  border-color: #3498db;
+  color: #3498db;
+  font-weight: 600;
+}
+
+.origen-personalizado {
+  margin-top: 5px;
+}
+
+.origen-personalizado input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: all 0.3s;
+}
+
+.origen-personalizado input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.opciones-transporte {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-transporte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-transporte:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-transporte.seleccionado {
+  border-color: #3498db;
+  background: #e8f4fc;
+  color: #3498db;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+}
+
+.btn-transporte span:first-child {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.btn-transporte span:last-child {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ruteo-info {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 25px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-item span:first-child {
+  font-size: 20px;
+  min-width: 30px;
+}
+
+.info-item span:nth-child(2) {
+  flex: 1;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.info-item strong {
+  color: #2c3e50;
+  font-size: 16px;
+  min-width: 80px;
+  text-align: right;
+}
+
+.ruteo-acciones {
+  display: flex;
+  gap: 15px;
+  margin: 30px 0 20px;
+}
+
+.btn-calcular {
+  flex: 2;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-calcular:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9, #2573a7);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+}
+
+.btn-calcular:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancelar {
+  flex: 1;
+  background: #f1f1f1;
+  color: #7f8c8d;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-cancelar:hover {
+  background: #e0e0e0;
+}
+
+.ruteo-aviso {
+  text-align: center;
+  color: #95a5a6;
+  font-size: 12px;
+  line-height: 1.5;
+  padding-top: 20px;
+  border-top: 1px dashed #eaeaea;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel-ruteo-contenido {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .panel-ruteo-header {
+    border-radius: 0;
+  }
+  
+  .opciones-transporte {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .btn-transporte {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 15px 20px;
+    gap: 15px;
+  }
+  
+  .btn-transporte span:first-child {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+  
+  .ruteo-acciones {
+    flex-direction: column;
+  }
+}
+
+
+
+/* Agrega estas reglas al final del archivo PanelRuteo.css */
+
+.origen-rapido {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.separador {
+  text-align: center;
+  margin: 15px 0;
+  position: relative;
+}
+
+.separador span {
+  background: white;
+  padding: 0 15px;
+  color: #7f8c8d;
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.separador::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #eaeaea;
+  z-index: 0;
+}
+
+.ayuda-direccion {
+  display: block;
+  margin-top: 5px;
+  color: #95a5a6;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.destino-tipo {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-size: 11px;
+}
+
+.spinner-mini {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+.origen-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.origen-btn:disabled small {
+  display: block;
+  font-size: 10px;
+  margin-top: 3px;
+  color: #95a5a6;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Agrega al final de PanelRuteo.css */
+
+/* Estilos para el input con sugerencias */
+.input-con-sugerencias {
+  position: relative;
+  width: 100%;
+}
+
+.input-con-sugerencias input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: all 0.3s;
+  padding-right: 40px; /* Espacio para el spinner */
+}
+
+.input-con-sugerencias input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.spinner-mini-busqueda {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(52, 152, 219, 0.2);
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Panel de sugerencias */
+.sugerencias-ruteo {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #3498db;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  margin-top: -2px; /* Para que se superponga con el borde del input */
+}
+
+.sugerencia-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sugerencia-item:hover {
+  background: #f8f9fa;
+}
+
+.sugerencia-item:last-child {
+  border-bottom: none;
+}
+
+.sugerencia-icono {
+  font-size: 16px;
+  margin-right: 10px;
+  margin-top: 2px;
+  min-width: 20px;
+}
+
+.sugerencia-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sugerencia-nombre {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 13px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sugerencia-direccion {
+  color: #7f8c8d;
+  font-size: 11px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sugerencia-tipo {
+  color: #3498db;
+  font-size: 10px;
+  font-weight: 600;
+  background: #e8f4fc;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.sin-sugerencias {
+  padding: 10px 15px;
+  text-align: center;
+  color: #95a5a6;
+  font-size: 12px;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+  border-top: 1px solid #eee;
+}
+
+/* Scrollbar para sugerencias */
+.sugerencias-ruteo::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sugerencias-ruteo::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sugerencias-ruteo::-webkit-scrollbar-thumb {
+  background: #3498db;
+  border-radius: 3px;
+}

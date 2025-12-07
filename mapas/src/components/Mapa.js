@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup,Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import './Mapa.css';
-
+import PanelRuteo from './PanelRuteo';
 // Componentes separados
 import Cabecera from './Cabecera';
 import ControlesMapa from './ControlesMapa';
@@ -27,6 +27,9 @@ function Mapa() {
   const [tipoMapa, setTipoMapa] = useState('vector_3857');
   const [zoom, setZoom] = useState(13);
   const [buscando, setBuscando] = useState(false);
+  const [mostrarPanelRuteo, setMostrarPanelRuteo] = useState(false);
+  const [destinoRuteo, setDestinoRuteo] = useState(null);
+  const [rutaCalculada, setRutaCalculada] = useState(null);
   
   // Referencias
   const mapRef = useRef();
@@ -84,61 +87,60 @@ function Mapa() {
   };
 
   // Transformar coordenadas ArcGIS
-  // REEMPLAZA la función transformarCoordenadasArcGIS con esta versión mejorada:
-const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
-  try {
-    // Si ya tenemos coordenadas WGS84 (y, x) en la geometría
-    if (geometry?.y && geometry?.x) {
-      // Verificar si ya son coordenadas válidas (Bogotá está entre lat 4-5, lng -75 a -74)
-      const lat = geometry.y;
-      const lng = geometry.x;
-      
-      if (lat >= 3 && lat <= 6 && lng >= -76 && lng <= -73) {
-        return { lat, lng };
-      }
-    }
-    
-    // Para polígonos (parques, barrios)
-    if (esPoligono && geometry?.rings?.[0]?.[0]) {
-      const lat = geometry.rings[0][0][1];
-      const lng = geometry.rings[0][0][0];
-      
-      // Validar que sean coordenadas razonables para Bogotá
-      if (lat >= 3 && lat <= 6 && lng >= -76 && lng <= -73) {
-        return { lat, lng };
-      }
-    }
-    
-    // Si las coordenadas están en EPSG:3857 (x,y muy grandes)
-    if (geometry?.x && geometry?.y) {
-      const x = geometry.x;
-      const y = geometry.y;
-      
-      // Si son coordenadas EPSG:3857 (valores grandes, millones)
-      if (Math.abs(x) > 1000000 || Math.abs(y) > 1000000) {
-        // Conversión aproximada EPSG:3857 → WGS84
-        const lon = (x * 180) / 20037508.34;
-        const lat = (Math.atan(Math.exp(y * Math.PI / 20037508.34)) * 360 / Math.PI) - 90;
+  const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
+    try {
+      // Si ya tenemos coordenadas WGS84 (y, x) en la geometría
+      if (geometry?.y && geometry?.x) {
+        // Verificar si ya son coordenadas válidas (Bogotá está entre lat 4-5, lng -75 a -74)
+        const lat = geometry.y;
+        const lng = geometry.x;
         
-        // Ajustar para Bogotá (aproximación)
-        const latAjustada = lat + 0.1; // Pequeño ajuste
-        const lonAjustada = lon - 0.1;
-        
-        if (latAjustada >= 4 && latAjustada <= 5 && lonAjustada >= -74.5 && lonAjustada <= -73.5) {
-          return { lat: latAjustada, lng: lonAjustada };
+        if (lat >= 3 && lat <= 6 && lng >= -76 && lng <= -73) {
+          return { lat, lng };
         }
       }
+      
+      // Para polígonos (parques, barrios)
+      if (esPoligono && geometry?.rings?.[0]?.[0]) {
+        const lat = geometry.rings[0][0][1];
+        const lng = geometry.rings[0][0][0];
+        
+        // Validar que sean coordenadas razonables para Bogotá
+        if (lat >= 3 && lat <= 6 && lng >= -76 && lng <= -73) {
+          return { lat, lng };
+        }
+      }
+      
+      // Si las coordenadas están en EPSG:3857 (x,y muy grandes)
+      if (geometry?.x && geometry?.y) {
+        const x = geometry.x;
+        const y = geometry.y;
+        
+        // Si son coordenadas EPSG:3857 (valores grandes, millones)
+        if (Math.abs(x) > 1000000 || Math.abs(y) > 1000000) {
+          // Conversión aproximada EPSG:3857 → WGS84
+          const lon = (x * 180) / 20037508.34;
+          const lat = (Math.atan(Math.exp(y * Math.PI / 20037508.34)) * 360 / Math.PI) - 90;
+          
+          // Ajustar para Bogotá (aproximación)
+          const latAjustada = lat + 0.1; // Pequeño ajuste
+          const lonAjustada = lon - 0.1;
+          
+          if (latAjustada >= 4 && latAjustada <= 5 && lonAjustada >= -74.5 && lonAjustada <= -73.5) {
+            return { lat: latAjustada, lng: lonAjustada };
+          }
+        }
+      }
+      
+      // Si llegamos aquí, usar coordenadas por defecto de Bogotá
+      console.warn('⚠️ Coordenadas no válidas, usando centro de Bogotá');
+      return { lat: 4.60971, lng: -74.08175 };
+      
+    } catch (error) {
+      console.error('❌ Error transformando coordenadas:', error);
+      return { lat: 4.60971, lng: -74.08175 };
     }
-    
-    // Si llegamos aquí, usar coordenadas por defecto de Bogotá
-    console.warn('⚠️ Coordenadas no válidas, usando centro de Bogotá');
-    return { lat: 4.60971, lng: -74.08175 };
-    
-  } catch (error) {
-    console.error('❌ Error transformando coordenadas:', error);
-    return { lat: 4.60971, lng: -74.08175 };
-  }
-};
+  };
 
   // BUSCAR EN MÚLTIPLES SERVICIOS ARCGIS
   const buscarEnArcGIS = async (termino) => {
@@ -351,9 +353,240 @@ const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
     }
   };
 
+  // Función para manejar el click en "Cómo llegar"
+  const handleComoLlegar = (destino) => {
+    setDestinoRuteo(destino);
+    setMostrarPanelRuteo(true);
+  };
+
+  // Función para calcular la ruta (llamar a la API)
+  // REEMPLAZA solo la función calcularRuta en Mapa.js:
+
+
+// REEMPLAZA la función calcularRuta con esta versión CORRECTA:
+
+// REEMPLAZA la función calcularRuta con esta versión CORRECTA:
+
+const calcularRuta = async (datosRuta) => {
+  console.log('📍 Datos para calcular ruta:', datosRuta);
+  
+  try {
+    // Validar datos
+    if (!datosRuta || !destinoRuteo) {
+      alert('Faltan datos para calcular la ruta');
+      return { success: false };
+    }
+    
+    // Preparamos los puntos de origen y destino
+    let origenCoords;
+    const origen = datosRuta.origen || '';
+    
+    // Verificar si el origen es válido
+    if (!origen.trim()) {
+      alert('Por favor selecciona o ingresa un origen');
+      return { success: false };
+    }
+    
+    // DEBUG: Ver qué datos tenemos
+    console.log('🔍 DEBUG calcularRuta:', {
+      origenTexto: origen,
+      tieneSugerencia: !!datosRuta.sugerenciaSeleccionada,
+      sugerencia: datosRuta.sugerenciaSeleccionada,
+      origenEsMiUbicacion: datosRuta.origenEsMiUbicacion
+    });
+    
+    // 1. CASO: Tenemos una sugerencia seleccionada con coordenadas
+    if (datosRuta.sugerenciaSeleccionada && 
+        datosRuta.sugerenciaSeleccionada.latitud && 
+        datosRuta.sugerenciaSeleccionada.longitud) {
+      
+      console.log('📍 Usando sugerencia seleccionada:', datosRuta.sugerenciaSeleccionada);
+      origenCoords = [
+        datosRuta.sugerenciaSeleccionada.latitud, 
+        datosRuta.sugerenciaSeleccionada.longitud
+      ];
+      console.log('✅ Coordenadas de sugerencia:', origenCoords);
+    }
+    // 2. CASO: Mi ubicación actual
+    else if (datosRuta.origenEsMiUbicacion && miUbicacion) {
+      console.log('📍 Usando ubicación actual del usuario:', miUbicacion);
+      origenCoords = miUbicacion;
+    } 
+    // 3. CASO: Centro de Bogotá
+    else if (origen.includes('Centro de Bogotá') || origen.includes('🏙️') || origen.includes('Centro Bogotá')) {
+      console.log('📍 Usando centro de Bogotá');
+      origenCoords = [4.60971, -74.08175];
+    }
+    // 4. CASO: Es una dirección escrita por el usuario (NO una sugerencia con paréntesis)
+    else if (!origen.includes('(') && !origen.includes(')')) {
+      console.log('📍 Geocodificando dirección del usuario:', origen);
+      
+      // Primero intentar geocodificar
+      const geoResult = await geocodificarDireccion(origen);
+      if (geoResult) {
+        origenCoords = [geoResult.latitud, geoResult.longitud];
+        console.log('✅ Dirección geocodificada:', origenCoords);
+      } else {
+        // Si falla, buscar como lugar en ArcGIS
+        console.log('⚠️ No se pudo geocodificar, buscando como lugar...');
+        const resultadosBusqueda = await buscarEnArcGIS(origen);
+        if (resultadosBusqueda.length > 0) {
+          const primerResultado = resultadosBusqueda[0];
+          origenCoords = [primerResultado.latitud, primerResultado.longitud];
+          console.log('✅ Lugar encontrado:', primerResultado.nombre, origenCoords);
+        } else {
+          alert(`No se encontró: "${origen}"\n\nPrueba con:\n• Nombres exactos: "Hospital San Carlos"\n• Direcciones: "KR 30 25 90"\n• Lugares: "universidad", "parque"`);
+          return { success: false };
+        }
+      }
+    }
+    // 5. CASO: Es una sugerencia en formato "Nombre (Tipo)" pero no tenemos las coordenadas
+    else {
+      console.log('🔍 Es una sugerencia en formato texto, extrayendo nombre...');
+      
+      // Extraer solo el nombre (antes del paréntesis)
+      const nombreLimpio = origen.split('(')[0].trim();
+      console.log('🔍 Buscando por nombre limpio:', nombreLimpio);
+      
+      // Buscar en ArcGIS
+      const resultadosBusqueda = await buscarEnArcGIS(nombreLimpio);
+      if (resultadosBusqueda.length > 0) {
+        const primerResultado = resultadosBusqueda[0];
+        origenCoords = [primerResultado.latitud, primerResultado.longitud];
+        console.log('✅ Lugar encontrado por nombre:', primerResultado.nombre, origenCoords);
+      } else {
+        // Intentar con geocodificación
+        const geoResult = await geocodificarDireccion(nombreLimpio);
+        if (geoResult) {
+          origenCoords = [geoResult.latitud, geoResult.longitud];
+          console.log('✅ Geocodificado por nombre:', origenCoords);
+        } else {
+          alert(`No se pudo encontrar: "${nombreLimpio}"`);
+          return { success: false };
+        }
+      }
+    }
+    
+    // Asegurar que el destino tiene coordenadas correctas
+    let destinoCoords = [destinoRuteo.latitud, destinoRuteo.longitud];
+    
+    // Si las coordenadas del destino parecen incorrectas, geocodificar
+    if (Math.abs(destinoCoords[1]) > 74.2) { // Longitud muy al occidente (fuera de Bogotá)
+      console.log('⚠️ Coordenadas destino sospechosas, geocodificando...');
+      const geoDestino = await geocodificarDireccion(destinoRuteo.nombre || destinoRuteo.direccion || destinoRuteo.nombre);
+      if (geoDestino) {
+        destinoCoords = [geoDestino.latitud, geoDestino.longitud];
+        console.log('✅ Destino geocodificado:', destinoCoords);
+      } else {
+        alert('No se pudo encontrar coordenadas válidas para el destino');
+        return { success: false };
+      }
+    }
+    
+    // Validar coordenadas (Bogotá está entre lat 4-5, lng -75 a -73)
+    if (!origenCoords || !destinoCoords) {
+      alert('No se pudieron obtener coordenadas válidas');
+      return { success: false };
+    }
+    
+    if (origenCoords[0] < 4 || origenCoords[0] > 5 ||
+        destinoCoords[0] < 4 || destinoCoords[0] > 5 ||
+        origenCoords[1] > -73 || origenCoords[1] < -75 ||
+        destinoCoords[1] > -73 || destinoCoords[1] < -75) {
+      console.error('❌ Coordenadas fuera de Bogotá:', { origenCoords, destinoCoords });
+      alert('Las coordenadas están fuera del área de Bogotá');
+      return { success: false };
+    }
+    
+    // Construir URL para la API de ruteo
+    const transporte = datosRuta.transporte || 'car';
+    const url = `https://catalogopmb.catastrobogota.gov.co/PMBWeb/web/ruteo?vehicle=${transporte}&point=${origenCoords[0]},${origenCoords[1]}&point=${destinoCoords[0]},${destinoCoords[1]}&type=json&locale=es&points_encoded=false&elevation=true&ch.disable=true`;
+    
+    console.log('📍 Calculando ruta:', url);
+    
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
+    
+    console.log('📍 Respuesta de la API de ruteo:', datos);
+    
+    if (datos.status === true && datos.response?.paths?.length > 0) {
+      // Guardar la ruta calculada
+      const rutaData = datos.response.paths[0];
+      setRutaCalculada({
+        ...rutaData,
+        origen: origenCoords,
+        destino: destinoCoords,
+        transporte: transporte,
+        url: url
+      });
+      
+      console.log('✅ Ruta calculada exitosamente:', rutaData);
+      
+      // Mostrar mensaje de éxito
+      const distanciaKm = (rutaData.distance / 1000).toFixed(1);
+      const tiempoMin = Math.round(rutaData.time / 60000);
+      
+      // Centrar el mapa en la ruta
+      if (mapRef.current) {
+        // Calcular el centro entre origen y destino
+        const centroLat = (origenCoords[0] + destinoCoords[0]) / 2;
+        const centroLng = (origenCoords[1] + destinoCoords[1]) / 2;
+        mapRef.current.setView([centroLat, centroLng], 14);
+      }
+      
+      alert(`✅ ¡Ruta calculada exitosamente!\n\n📏 Distancia: ${distanciaKm} km\n⏱️ Tiempo estimado: ${tiempoMin} minutos\n\nLa ruta se mostrará en el mapa en color azul.`);
+      
+      return { 
+        success: true, 
+        ruta: rutaData,
+        distancia: distanciaKm,
+        tiempo: tiempoMin
+      };
+    } else {
+      console.error('❌ Error API:', datos);
+      alert('No se pudo calcular la ruta. Intenta con otra ubicación o transporte.');
+      return { success: false };
+    }
+    
+  } catch (error) {
+    console.error('❌ Error calculando ruta:', error);
+    alert('Error al conectar con el servicio de rutas. Verifica tu conexión a internet.');
+    return { success: false };
+  }
+};
+
+
+
+
+
+
+
+
+
+
+  // Agregar la función global para que los popups puedan llamarla
+  useEffect(() => {
+    window.iniciarRuteo = handleComoLlegar;
+    return () => {
+      window.iniciarRuteo = null;
+    };
+  }, []);
+
   // Cambiar tipo de mapa
   const cambiarMapa = (tipo) => {
     setTipoMapa(tipo);
+  };
+
+  // Función para obtener el icono según el tipo
+  const getIcono = (tipo) => {
+    if (tipo.includes('Hospital')) return '🏥';
+    if (tipo.includes('Universidad')) return '🎓';
+    if (tipo.includes('Parque')) return '🌳';
+    if (tipo.includes('Barrio')) return '🏘️';
+    if (tipo.includes('Mercado')) return '🛒';
+    if (tipo.includes('Paradero')) return '🚏';
+    if (tipo.includes('Dirección')) return '📍';
+    return '📍';
   };
 
   return (
@@ -366,15 +599,14 @@ const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
         onSeleccionarSugerencia={handleSeleccionarSugerencia}  
       />
 
-{/* ==== OVERLAY SOBRE TODO ==== */}
-    {buscando && (
-      <div className="overlay-carga-global">
-        <div className="spinner-grande"></div>
-        <p>Buscando en servicios de Bogotá...</p>
-        <small>Hospitales • Universidades • Parques • Barrios • Mercados • Paraderos</small>
-      </div>
-    )}
-
+      {/* ==== OVERLAY SOBRE TODO ==== */}
+      {buscando && (
+        <div className="overlay-carga-global">
+          <div className="spinner-grande"></div>
+          <p>Buscando en servicios de Bogotá...</p>
+          <small>Hospitales • Universidades • Parques • Barrios • Mercados • Paraderos</small>
+        </div>
+      )}
 
       <div className="contenedor-principal">
         <ControlesMapa
@@ -390,74 +622,119 @@ const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
   
         <div className="mapa-area">
           <MapContainer
-            center={center}
-            zoom={zoom}
-            ref={mapRef}
-            zoomControl={false}
-            className="leaflet-container"
-          >
-            <TileLayer
-              url={mapasBase[tipoMapa].url}
-              attribution={mapasBase[tipoMapa].atribucion}
-            />
-            
-            {/* Marcador del centro */}
-            {!miUbicacion && !resultados.length && (
-              <Marker position={center}>
-                <Popup>Centro de Bogotá</Popup>
-              </Marker>
-            )}
-            
-            {/* Marcador de MI ubicación */}
-            {miUbicacion && (
-              <Marker position={miUbicacion}>
-                <Popup>
-                  <strong>¡Estás aquí!</strong><br/>
-                  Lat: {miUbicacion[0].toFixed(6)}<br/>
-                  Lng: {miUbicacion[1].toFixed(6)}
-                </Popup>
-              </Marker>
-            )}
-            
-            {/* Resultados de búsqueda */}
-            {resultados.slice(0, 15).map((resultado, index) => (
-              <Marker 
-                key={index} 
-                position={[resultado.latitud, resultado.longitud]}
-              >
-                <Popup>
-                  <div className="popup-contenido">
-                    <strong>{resultado.nombre}</strong><br/>
-                    <small className="popup-tipo">{resultado.tipo}</small>
-                    {resultado.direccion && (
-                      <div className="popup-direccion">
-                        <strong>Dirección:</strong> {resultado.direccion}
-                      </div>
-                    )}
-                    {resultado.localidad && (
-                      <div className="popup-localidad">
-                        <strong>Localidad:</strong> {resultado.localidad}
-                      </div>
-                    )}
-                    {resultado.barrio && (
-                      <div className="popup-barrio">
-                        <strong>Barrio:</strong> {resultado.barrio}
-                      </div>
-                    )}
-                    {resultado.tipoDireccion && (
-                      <div className="popup-tipo-direccion">
-                        <small><em>{resultado.tipoDireccion}</em></small>
-                      </div>
-                    )}
-                    <div className="popup-coordenadas">
-                      <small>Lat: {resultado.latitud.toFixed(6)}</small><br/>
-                      <small>Lng: {resultado.longitud.toFixed(6)}</small>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+  center={center}
+  zoom={zoom}
+  ref={mapRef}
+  zoomControl={false}
+  className="leaflet-container"
+  whenCreated={(mapInstance) => {
+    mapRef.current = mapInstance;
+  }}
+>
+  <TileLayer
+    url={mapasBase[tipoMapa].url}
+    attribution={mapasBase[tipoMapa].atribucion}
+  />
+  
+  {/* Marcador del centro */}
+  {!miUbicacion && !resultados.length && (
+    <Marker position={center}>
+      <Popup>Centro de Bogotá</Popup>
+    </Marker>
+  )}
+  
+  {/* Marcador de MI ubicación */}
+  {miUbicacion && (
+    <Marker position={miUbicacion}>
+      <Popup>
+        <strong>¡Estás aquí!</strong><br/>
+        Lat: {miUbicacion[0].toFixed(6)}<br/>
+        Lng: {miUbicacion[1].toFixed(6)}
+      </Popup>
+    </Marker>
+  )}
+  
+  {/* RUTA CALCULADA - NUEVO */}
+  {rutaCalculada && rutaCalculada.points?.coordinates && (
+    <Polyline
+      positions={rutaCalculada.points.coordinates.map(coord => [coord[1], coord[0]])}
+      color={rutaCalculada.transporte === 'car' ? '#3498db' : 
+             rutaCalculada.transporte === 'bike' ? '#2ecc71' : '#9b59b6'}
+      weight={6}
+      opacity={0.8}
+    >
+      <Popup>
+        <div className="popup-ruta">
+          <strong>📏 Ruta calculada</strong><br/>
+          <small>Distancia: {(rutaCalculada.distance / 1000).toFixed(1)} km</small><br/>
+          <small>Tiempo: {Math.round(rutaCalculada.time / 60000)} min</small><br/>
+          <small>Transporte: {
+            rutaCalculada.transporte === 'car' ? '🚗 Auto' : 
+            rutaCalculada.transporte === 'bike' ? '🚲 Bicicleta' : '🚶 Caminando'
+          }</small>
+        </div>
+      </Popup>
+    </Polyline>
+  )}
+  
+  {/* Resultados de búsqueda */}
+  {resultados.slice(0, 15).map((resultado, index) => (
+    <Marker 
+      key={index} 
+      position={[resultado.latitud, resultado.longitud]}
+    >
+      <Popup>
+        <div className="popup-contenido">
+          <strong>{resultado.nombre}</strong><br/>
+          <small className="popup-tipo">{resultado.tipo}</small>
+          
+          {resultado.direccion && (
+            <div className="popup-direccion">
+              <strong>Dirección:</strong> {resultado.direccion}
+            </div>
+          )}
+          
+          {resultado.localidad && (
+            <div className="popup-localidad">
+              <strong>Localidad:</strong> {resultado.localidad}
+            </div>
+          )}
+          
+          {resultado.barrio && (
+            <div className="popup-barrio">
+              <strong>Barrio:</strong> {resultado.barrio}
+            </div>
+          )}
+          
+          {/* BOTÓN "CÓMO LLEGAR" */}
+          <div className="popup-acciones">
+            <button 
+              className="btn-como-llegar"
+              onClick={(e) => {
+                e.stopPropagation();
+                const destino = {
+                  nombre: resultado.nombre,
+                  latitud: resultado.latitud,
+                  longitud: resultado.longitud,
+                  direccion: resultado.direccion || resultado.nombre,
+                  tipo: resultado.tipo
+                };
+                handleComoLlegar(destino);
+              }}
+            >
+              {getIcono(resultado.tipo)} ¿Cómo llegar?
+            </button>
+          </div>
+          
+          <div className="popup-coordenadas">
+            <small>Lat: {resultado.latitud.toFixed(6)}</small><br/>
+            <small>Lng: {resultado.longitud.toFixed(6)}</small>
+          </div>
+        </div>
+      </Popup>
+    </Marker>
+  ))}
+</MapContainer>
         </div>
 
         <PanelResultados 
@@ -466,6 +743,16 @@ const transformarCoordenadasArcGIS = (geometry, esPoligono = false) => {
           buscando={buscando}
         />
       </div>
+
+      {/* PANEL DE RUTEO */}
+      {mostrarPanelRuteo && (
+        <PanelRuteo
+          destino={destinoRuteo}
+          miUbicacion={miUbicacion}
+          onClose={() => setMostrarPanelRuteo(false)}
+          onCalcularRuta={calcularRuta}
+        />
+      )}
     </div>
   );
 }
