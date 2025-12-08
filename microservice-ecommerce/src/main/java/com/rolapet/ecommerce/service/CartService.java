@@ -185,10 +185,11 @@ public class CartService {
             productService.updateStock(product.getId(), item.getQuantity());
             
             // Enviar correo de confirmación (mock)
+            // TODO: En producción, integrar con el servicio de usuarios para obtener emails reales
             emailService.sendPurchaseConfirmation(
                 savedTransaction,
-                "buyer@email.com", // En producción, obtener del servicio de usuarios
-                "seller@email.com", // En producción, obtener del servicio de usuarios
+                "buyer@email.com", // Mock - obtener del servicio de usuarios en producción
+                "seller@email.com", // Mock - obtener del servicio de usuarios en producción
                 product.getTitle()
             );
         }

@@ -7,7 +7,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:sqlserver://databasesqlprueba1.database.windows.net:1433;database=base1;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;}
     username: ${DB_USERNAME:adminsql}
-    password: ${DB_PASSWORD:Enano0301}
+    password: ${DB_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:

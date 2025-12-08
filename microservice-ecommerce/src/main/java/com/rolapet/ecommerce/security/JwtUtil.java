@@ -29,9 +29,9 @@ public class JwtUtil {
             return Long.valueOf(userIdClaim.toString());
         }
         
-        // Si no hay userId en el claim, intentar extraer del subject
-        // Esto es un fallback, en producción debería usar un servicio de usuarios
-        return 1L; // Valor por defecto para desarrollo
+        // Si no hay userId en el claim, lanzar excepción
+        // En producción, esto debería integrarse con un servicio de usuarios
+        throw new RuntimeException("No se pudo extraer el userId del token JWT");
     }
     
     private Claims extractAllClaims(String token) {
