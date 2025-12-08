@@ -4,7 +4,7 @@ Microservicio de ecommerce para la gestión de productos, carrito de compras y t
 
 ## 🚀 Tecnologías
 
-- Java 21
+- Java 17
 - Spring Boot 3.4.12
 - Spring Data JPA
 - Spring Security + JWT
