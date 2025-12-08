@@ -16,17 +16,22 @@ echo                           by lufero
 echo    ========================================================
 echo.
 
-echo [1/3] Iniciando Auth Service (puerto 8081)...
+echo [1/4] Iniciando Auth Service (puerto 8081)...
 start "Auth_Service" /B /MIN cmd /c "cd microservice-auth && mvn spring-boot:run"
 
 timeout /t 10 >nul
 
-echo [2/3] Iniciando User Service (puerto 8082)...
+echo [2/4] Iniciando User Service (puerto 8082)...
 start "User_Service" /B /MIN cmd /c "cd microservice-user && mvn spring-boot:run"
 
 timeout /t 10 >nul
 
-echo [3/3] Iniciando Frontend (puerto 3000)...
+echo [3/4] Iniciando E-commerce Service (puerto 8084)...
+start "Ecommerce_Service" /B /MIN cmd /c "cd microservice-ecommerce && mvn spring-boot:run"
+
+timeout /t 10 >nul
+
+echo [4/4] Iniciando Frontend (puerto 3000)...
 start "Frontend" /B /MIN cmd /c "cd frontend\rolapet-frontend && npm start"
 
 echo ========================================================
@@ -36,6 +41,7 @@ echo.
 echo    📍 Endpoints disponibles:
 echo       🔐 Auth:    http://localhost:8081
 echo       👤 User:    http://localhost:8082  
+echo       🛒 E-commerce: http://localhost:8084
 echo       🖥️  Front:   http://localhost:3000
 echo.
 echo    📋 Esta ventana es solo de control

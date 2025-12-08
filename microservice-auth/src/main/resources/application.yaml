@@ -17,6 +17,6 @@ spring:
         format_sql: true
 
 jwt:
-  secret: "SECRETO_ULTRA_LARGO_DE_MINIMO_32_CARACTERES_12345678"
+  secret: "U0VDUkVUT19VTFRSQV9MQVJHX0RFX01JTklNT18zMl9DQVJBQ1RFUkVTXzEyMzQ1Njc4"
   expiration: 3600000
 
