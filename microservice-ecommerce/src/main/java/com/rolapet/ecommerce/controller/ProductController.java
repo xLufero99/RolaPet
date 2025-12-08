@@ -5,7 +5,6 @@ import com.rolapet.ecommerce.entity.Product;
 import com.rolapet.ecommerce.entity.ProductCategory;
 import com.rolapet.ecommerce.entity.Transaction;
 import com.rolapet.ecommerce.entity.ProductStatus;
-import com.rolapet.ecommerce.security.JwtUtil;
 import com.rolapet.ecommerce.service.EmailService;
 import com.rolapet.ecommerce.service.ProductService;
 import com.rolapet.ecommerce.service.TransactionService;
@@ -13,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -26,15 +27,14 @@ public class ProductController {
     private final ProductService productService;
     private final TransactionService transactionService;
     private final EmailService emailService;
-    private final JwtUtil jwtUtil;
     
     @PostMapping
     public ResponseEntity<Product> createProduct(
             @Valid @RequestBody ProductRequest request,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        Product product = productService.createProduct(request, userId);
+        String userEmail = userDetails.getUsername();
+        Product product = productService.createProduct(request, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
     
@@ -59,20 +59,20 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductRequest request,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        Product product = productService.updateProduct(id, request, userId);
+        String userEmail = userDetails.getUsername();
+        Product product = productService.updateProduct(id, request, userEmail);
         return ResponseEntity.ok(product);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        productService.deleteProduct(id, userId);
+        String userEmail = userDetails.getUsername();
+        productService.deleteProduct(id, userEmail);
         return ResponseEntity.noContent().build();
     }
     
@@ -80,13 +80,13 @@ public class ProductController {
     public ResponseEntity<Transaction> purchaseProduct(
             @PathVariable Long id,
             @RequestParam Integer quantity,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long buyerId = jwtUtil.extractUserIdFromToken(token);
+        String buyerEmail = userDetails.getUsername();
         Product product = productService.getProductById(id);
         
         // Validaciones
-        if (product.getUserId().equals(buyerId)) {
+        if (product.getUserEmail().equals(buyerEmail)) {
             throw new RuntimeException("No puedes comprar tu propio producto");
         }
         
@@ -101,8 +101,8 @@ public class ProductController {
         // Crear transacción
         Transaction transaction = new Transaction();
         transaction.setProductId(product.getId());
-        transaction.setBuyerId(buyerId);
-        transaction.setSellerId(product.getUserId());
+        transaction.setBuyerEmail(buyerEmail);
+        transaction.setSellerEmail(product.getUserEmail());
         transaction.setQuantity(quantity);
         transaction.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
         transaction.setStatus("COMPLETADA");

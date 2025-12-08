@@ -28,17 +28,17 @@ public class CartService {
     private final EmailService emailService;
     
     @Transactional
-    public Cart getOrCreateCart(Long userId) {
-        return cartRepository.findByUserId(userId)
+    public Cart getOrCreateCart(String userEmail) {
+        return cartRepository.findByUserEmail(userEmail)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
-                    newCart.setUserId(userId);
+                    newCart.setUserEmail(userEmail);
                     return cartRepository.save(newCart);
                 });
     }
     
-    public Map<String, Object> getMyCart(Long userId) {
-        Cart cart = getOrCreateCart(userId);
+    public Map<String, Object> getMyCart(String userEmail) {
+        Cart cart = getOrCreateCart(userEmail);
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
         
         // Calcular total
@@ -71,12 +71,12 @@ public class CartService {
     }
     
     @Transactional
-    public CartItem addItemToCart(Long userId, CartItemRequest request) {
-        Cart cart = getOrCreateCart(userId);
+    public CartItem addItemToCart(String userEmail, CartItemRequest request) {
+        Cart cart = getOrCreateCart(userEmail);
         Product product = productService.getProductById(request.getProductId());
         
         // Validaciones
-        if (product.getUserId().equals(userId)) {
+        if (product.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("No puedes comprar tu propio producto");
         }
         
@@ -108,14 +108,14 @@ public class CartService {
     }
     
     @Transactional
-    public CartItem updateCartItem(Long itemId, Integer quantity, Long userId) {
+    public CartItem updateCartItem(Long itemId, Integer quantity, String userEmail) {
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado en el carrito"));
         
         Cart cart = cartRepository.findById(item.getCartId())
                 .orElseThrow(() -> new RuntimeException("Carrito no encontrado"));
         
-        if (!cart.getUserId().equals(userId)) {
+        if (!cart.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("No tienes permiso para modificar este carrito");
         }
         
@@ -130,14 +130,14 @@ public class CartService {
     }
     
     @Transactional
-    public void removeItemFromCart(Long itemId, Long userId) {
+    public void removeItemFromCart(Long itemId, String userEmail) {
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado en el carrito"));
         
         Cart cart = cartRepository.findById(item.getCartId())
                 .orElseThrow(() -> new RuntimeException("Carrito no encontrado"));
         
-        if (!cart.getUserId().equals(userId)) {
+        if (!cart.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("No tienes permiso para modificar este carrito");
         }
         
@@ -145,8 +145,8 @@ public class CartService {
     }
     
     @Transactional
-    public CheckoutResponse checkout(Long userId) {
-        Cart cart = getOrCreateCart(userId);
+    public CheckoutResponse checkout(String userEmail) {
+        Cart cart = getOrCreateCart(userEmail);
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
         
         if (items.isEmpty()) {
@@ -172,8 +172,8 @@ public class CartService {
             // Crear transacción
             Transaction transaction = new Transaction();
             transaction.setProductId(product.getId());
-            transaction.setBuyerId(userId);
-            transaction.setSellerId(product.getUserId());
+            transaction.setBuyerEmail(userEmail);
+            transaction.setSellerEmail(product.getUserEmail());
             transaction.setQuantity(item.getQuantity());
             transaction.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
             transaction.setStatus("COMPLETADA");
@@ -205,8 +205,8 @@ public class CartService {
     }
     
     @Transactional
-    public void clearCart(Long userId) {
-        Cart cart = getOrCreateCart(userId);
+    public void clearCart(String userEmail) {
+        Cart cart = getOrCreateCart(userEmail);
         cartItemRepository.deleteByCartId(cart.getId());
     }
 }

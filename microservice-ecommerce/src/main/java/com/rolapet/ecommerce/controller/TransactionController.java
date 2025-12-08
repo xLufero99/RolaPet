@@ -1,10 +1,11 @@
 package com.rolapet.ecommerce.controller;
 
 import com.rolapet.ecommerce.entity.Transaction;
-import com.rolapet.ecommerce.security.JwtUtil;
 import com.rolapet.ecommerce.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,41 +16,40 @@ import java.util.List;
 public class TransactionController {
     
     private final TransactionService transactionService;
-    private final JwtUtil jwtUtil;
     
     @GetMapping("/my-purchases")
     public ResponseEntity<List<Transaction>> getMyPurchases(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        List<Transaction> purchases = transactionService.getMyPurchases(userId);
+        String userEmail = userDetails.getUsername();
+        List<Transaction> purchases = transactionService.getMyPurchases(userEmail);
         return ResponseEntity.ok(purchases);
     }
     
     @GetMapping("/my-sales")
     public ResponseEntity<List<Transaction>> getMySales(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        List<Transaction> sales = transactionService.getMySales(userId);
+        String userEmail = userDetails.getUsername();
+        List<Transaction> sales = transactionService.getMySales(userEmail);
         return ResponseEntity.ok(sales);
     }
     
     @GetMapping("/last-purchase")
     public ResponseEntity<Transaction> getLastPurchase(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        Transaction lastPurchase = transactionService.getLastPurchase(userId);
+        String userEmail = userDetails.getUsername();
+        Transaction lastPurchase = transactionService.getLastPurchase(userEmail);
         return ResponseEntity.ok(lastPurchase);
     }
     
     @GetMapping("/last-sale")
     public ResponseEntity<Transaction> getLastSale(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        Transaction lastSale = transactionService.getLastSale(userId);
+        String userEmail = userDetails.getUsername();
+        Transaction lastSale = transactionService.getLastSale(userEmail);
         return ResponseEntity.ok(lastSale);
     }
 }

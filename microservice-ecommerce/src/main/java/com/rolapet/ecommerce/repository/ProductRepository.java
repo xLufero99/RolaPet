@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findByUserIdOrderByCreatedAtDesc(Long userId);
+    List<Product> findByUserEmailOrderByCreatedAtDesc(String userEmail);
     
     List<Product> findByStatusOrderByCreatedAtDesc(ProductStatus status);
     

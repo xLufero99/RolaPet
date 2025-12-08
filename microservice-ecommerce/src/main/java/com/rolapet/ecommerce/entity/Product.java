@@ -18,8 +18,8 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
-    private Long userId; // ID del vendedor
+    @Column(nullable = false, length = 255)
+    private String userEmail; // Email del vendedor
     
     @Column(nullable = false)
     private String title; // Nombre del producto
