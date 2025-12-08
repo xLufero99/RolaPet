@@ -20,4 +20,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(String title, ProductStatus status);
     
     List<Product> findByPriceBetweenAndStatusOrderByCreatedAtDesc(BigDecimal minPrice, BigDecimal maxPrice, ProductStatus status);
+
+     List<Product> findByUserEmail(String userEmail);
+
+
+
 }

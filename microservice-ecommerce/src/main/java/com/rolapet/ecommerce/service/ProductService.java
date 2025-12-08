@@ -113,4 +113,12 @@ public class ProductService {
         
         productRepository.save(product);
     }
+
+
+public List<Product> getProductsBySeller(String userEmail) {
+    return productRepository.findByUserEmail(userEmail);
+}
+
+
+
 }

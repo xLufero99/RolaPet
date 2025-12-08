@@ -66,6 +66,22 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
     
+
+@GetMapping("/my-products")
+public ResponseEntity<List<Product>> getMyProducts(
+        @AuthenticationPrincipal UserDetails userDetails
+) {
+    String userEmail = userDetails.getUsername();
+    List<Product> products = productService.getProductsBySeller(userEmail);
+    return ResponseEntity.ok(products);
+}
+
+
+
+
+
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable Long id,
