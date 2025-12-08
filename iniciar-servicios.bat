@@ -15,44 +15,31 @@ echo                           by lufero
 echo    ========================================================
 echo.
 
-echo [INFO] Verificando estructura del proyecto...
+REM Usar el directorio donde está este script como base
+set "ROOT_DIR=%~dp0"
+cd /d "%ROOT_DIR%"
 
-REM Verificar que estamos en la carpeta correcta o encontrar RolaPet
-if exist "microservice-auth" (
-    echo [OK] Estructura de RolaPet detectada.
-) else (
-    echo [ERROR] No se encontró la carpeta microservice-auth
-    echo [INFO] Buscando estructura RolaPet en directorio padre...
-    cd ..
-    if exist "microservice-auth" (
-        echo [OK] Estructura encontrada.
-    ) else (
-        echo [ERROR] No se puede encontrar la estructura de RolaPet.
-        echo [INFO] Ejecuta este script desde la carpeta RolaPet.
-        pause
-        exit /b 1
-    )
-)
+echo [INFO] Directorio base: %ROOT_DIR%
 
 echo [1/4] Iniciando Auth Service (puerto 8081)...
-start "Auth_Service" /B /MIN cmd /c "cd microservice-auth && mvn spring-boot:run"
+start "Auth_Service" /B cmd /c "cd /d "%ROOT_DIR%microservice-auth" && mvn spring-boot:run"
 
 timeout /t 10 >nul
 
 echo [2/4] Iniciando User Service (puerto 8082)...
-start "User_Service" /B /MIN cmd /c "cd microservice-user && mvn spring-boot:run"
+start "User_Service" /B cmd /c "cd /d "%ROOT_DIR%microservice-user" && mvn spring-boot:run"
 
 timeout /t 10 >nul
 
 echo [3/4] Iniciando E-commerce Service (puerto 8084)...
-start "Ecommerce_Service" /B /MIN cmd /c "cd microservice-ecommerce && mvn spring-boot:run"
+start "Ecommerce_Service" /B cmd /c "cd /d "%ROOT_DIR%microservice-ecommerce" && mvn spring-boot:run"
 
 timeout /t 10 >nul
 
 REM Verificar si existe frontend antes de iniciarlo
-if exist "frontend\rolapet-frontend" (
+if exist "%ROOT_DIR%frontend\rolapet-frontend\package.json" (
     echo [4/4] Iniciando Frontend (puerto 3000)...
-    start "Frontend" /B /MIN cmd /c "cd frontend\rolapet-frontend && npm start"
+    start "Frontend" /B cmd /c "cd /d "%ROOT_DIR%frontend\rolapet-frontend" && npm start && pause"
 ) else (
     echo [INFO] Frontend no encontrado, omitiendo...
 )
@@ -65,7 +52,7 @@ echo    📍 Endpoints disponibles:
 echo       🔐 Auth:    http://localhost:8081
 echo       👤 User:    http://localhost:8082  
 echo       🛒 E-commerce: http://localhost:8084
-if exist "frontend\rolapet-frontend" (
+if exist "%ROOT_DIR%frontend\rolapet-frontend\package.json" (
 echo       🖥️  Front:   http://localhost:3000
 )
 echo.
