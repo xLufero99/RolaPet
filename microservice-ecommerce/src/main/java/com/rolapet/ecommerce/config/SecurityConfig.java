@@ -39,6 +39,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // CSRF protection is disabled because this is a stateless REST API using JWT tokens
+            // JWT tokens in headers provide protection against CSRF attacks
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/ecommerce/products", "/api/v1/ecommerce/products/**").permitAll()
