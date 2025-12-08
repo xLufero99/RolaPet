@@ -21,7 +21,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private static final String SECRET_KEY = "U0VDUkVUT19VTFRSQV9MQVJHX0RFX01JTklNT18zMl9DQVJBQ1RFUkVTXzEyMzQ1Njc4";
+    private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
