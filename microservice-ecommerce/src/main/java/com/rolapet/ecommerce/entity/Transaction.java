@@ -21,11 +21,11 @@ public class Transaction {
     @Column(nullable = false)
     private Long productId;
     
-    @Column(nullable = false)
-    private Long buyerId; // ID del comprador
+    @Column(nullable = false, length = 255)
+    private String buyerEmail; // Email del comprador
     
-    @Column(nullable = false)
-    private Long sellerId; // ID del vendedor
+    @Column(nullable = false, length = 255)
+    private String sellerEmail; // Email del vendedor
     
     @Column(nullable = false)
     private Integer quantity;

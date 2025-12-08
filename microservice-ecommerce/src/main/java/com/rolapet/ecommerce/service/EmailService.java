@@ -15,8 +15,8 @@ public class EmailService {
         log.info("Asunto: Confirmación de compra - {}", productTitle);
         log.info("Producto: {}", productTitle);
         log.info("Precio Total: ${}", transaction.getTotalPrice());
-        log.info("Comprador ID: {}", transaction.getBuyerId());
-        log.info("Vendedor ID: {}", transaction.getSellerId());
+        log.info("Comprador: {}", transaction.getBuyerEmail());
+        log.info("Vendedor: {}", transaction.getSellerEmail());
         log.info("Cantidad: {}", transaction.getQuantity());
         log.info("===========================================");
         

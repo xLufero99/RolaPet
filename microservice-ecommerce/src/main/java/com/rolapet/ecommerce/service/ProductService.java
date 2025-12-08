@@ -21,11 +21,11 @@ public class ProductService {
     private final ProductRepository productRepository;
     
     @Transactional
-    public Product createProduct(ProductRequest request, Long userId) {
-        log.info("Creando producto para usuario: {}", userId);
+    public Product createProduct(ProductRequest request, String userEmail) {
+        log.info("Creando producto para usuario: {}", userEmail);
         
         Product product = new Product();
-        product.setUserId(userId);
+        product.setUserEmail(userEmail);
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -66,11 +66,11 @@ public class ProductService {
     }
     
     @Transactional
-    public Product updateProduct(Long id, ProductRequest request, Long userId) {
+    public Product updateProduct(Long id, ProductRequest request, String userEmail) {
         Product product = getProductById(id);
         
         // Validar que el usuario es el vendedor
-        if (!product.getUserId().equals(userId)) {
+        if (!product.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("No tienes permiso para editar este producto");
         }
         
@@ -86,11 +86,11 @@ public class ProductService {
     }
     
     @Transactional
-    public void deleteProduct(Long id, Long userId) {
+    public void deleteProduct(Long id, String userEmail) {
         Product product = getProductById(id);
         
         // Validar que el usuario es el vendedor
-        if (!product.getUserId().equals(userId)) {
+        if (!product.getUserEmail().equals(userEmail)) {
             throw new RuntimeException("No tienes permiso para eliminar este producto");
         }
         

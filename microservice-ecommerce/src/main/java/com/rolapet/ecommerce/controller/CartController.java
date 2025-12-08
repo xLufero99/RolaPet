@@ -3,12 +3,13 @@ package com.rolapet.ecommerce.controller;
 import com.rolapet.ecommerce.dto.CartItemRequest;
 import com.rolapet.ecommerce.dto.CheckoutResponse;
 import com.rolapet.ecommerce.entity.CartItem;
-import com.rolapet.ecommerce.security.JwtUtil;
 import com.rolapet.ecommerce.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -19,24 +20,23 @@ import java.util.Map;
 public class CartController {
     
     private final CartService cartService;
-    private final JwtUtil jwtUtil;
     
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMyCart(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        Map<String, Object> cart = cartService.getMyCart(userId);
+        String userEmail = userDetails.getUsername();
+        Map<String, Object> cart = cartService.getMyCart(userEmail);
         return ResponseEntity.ok(cart);
     }
     
     @PostMapping("/items")
     public ResponseEntity<CartItem> addItemToCart(
             @Valid @RequestBody CartItemRequest request,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        CartItem item = cartService.addItemToCart(userId, request);
+        String userEmail = userDetails.getUsername();
+        CartItem item = cartService.addItemToCart(userEmail, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(item);
     }
     
@@ -44,38 +44,38 @@ public class CartController {
     public ResponseEntity<CartItem> updateCartItem(
             @PathVariable Long id,
             @RequestParam Integer quantity,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        CartItem item = cartService.updateCartItem(id, quantity, userId);
+        String userEmail = userDetails.getUsername();
+        CartItem item = cartService.updateCartItem(id, quantity, userEmail);
         return ResponseEntity.ok(item);
     }
     
     @DeleteMapping("/items/{id}")
     public ResponseEntity<Void> removeItemFromCart(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        cartService.removeItemFromCart(id, userId);
+        String userEmail = userDetails.getUsername();
+        cartService.removeItemFromCart(id, userEmail);
         return ResponseEntity.noContent().build();
     }
     
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        CheckoutResponse response = cartService.checkout(userId);
+        String userEmail = userDetails.getUsername();
+        CheckoutResponse response = cartService.checkout(userEmail);
         return ResponseEntity.ok(response);
     }
     
     @DeleteMapping("/clear")
     public ResponseEntity<Void> clearCart(
-            @RequestHeader("Authorization") String token
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = jwtUtil.extractUserIdFromToken(token);
-        cartService.clearCart(userId);
+        String userEmail = userDetails.getUsername();
+        cartService.clearCart(userEmail);
         return ResponseEntity.noContent().build();
     }
 }

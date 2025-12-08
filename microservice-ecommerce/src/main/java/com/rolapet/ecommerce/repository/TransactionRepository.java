@@ -9,11 +9,11 @@ import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByBuyerIdOrderByCreatedAtDesc(Long buyerId);
+    List<Transaction> findByBuyerEmailOrderByCreatedAtDesc(String buyerEmail);
     
-    List<Transaction> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
+    List<Transaction> findBySellerEmailOrderByCreatedAtDesc(String sellerEmail);
     
-    Optional<Transaction> findFirstByBuyerIdOrderByCreatedAtDesc(Long buyerId);
+    Optional<Transaction> findFirstByBuyerEmailOrderByCreatedAtDesc(String buyerEmail);
     
-    Optional<Transaction> findFirstBySellerIdOrderByCreatedAtDesc(Long sellerId);
+    Optional<Transaction> findFirstBySellerEmailOrderByCreatedAtDesc(String sellerEmail);
 }
