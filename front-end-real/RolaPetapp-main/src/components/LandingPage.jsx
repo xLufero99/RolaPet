@@ -1,10 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { MapPin, ShoppingBag, Users, Star, ArrowRight, Zap, Shield, Heart } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
-export function LandingPage({ onViewChange }) {
+export function LandingPage() {
+  const navigate = useNavigate();
+
   const features = [
     {
       icon: MapPin,
@@ -66,7 +69,7 @@ export function LandingPage({ onViewChange }) {
                 <Button 
                   size="lg" 
                   className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-                  onClick={() => onViewChange('register')}
+                  onClick={() => navigate('/register')}
                 >
                   Únete a la Comunidad
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -75,7 +78,7 @@ export function LandingPage({ onViewChange }) {
                   variant="outline" 
                   size="lg" 
                   className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3"
-                  onClick={() => onViewChange('login')}
+                  onClick={() => navigate('/login')}
                 >
                   Iniciar Sesión
                 </Button>
@@ -196,7 +199,7 @@ export function LandingPage({ onViewChange }) {
           <Button 
             size="lg" 
             className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3"
-            onClick={() => onViewChange('register')}
+            onClick={() => navigate('/register')}
           >
             Registrarse Gratis
             <ArrowRight className="ml-2 w-5 h-5" />

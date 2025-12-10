@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -7,20 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from './ui/checkbox';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
-export function AuthPages({ view, onViewChange, onLogin }) {
+const API = "http://localhost:8081/api/v1/auth/register"
+
+export function AuthPages({ view }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    vehicleType: '',
+    cedula: '',
     acceptTerms: false,
-    membershipNumber: ''
+    birthdate: ''
   });
 
   const [errors, setErrors] = useState({});
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -45,10 +48,9 @@ export function AuthPages({ view, onViewChange, onLogin }) {
     }
 
     if (view === 'register') {
-      if (!formData.firstName) newErrors.firstName = 'El nombre es requerido';
-      if (!formData.lastName) newErrors.lastName = 'El apellido es requerido';
-      if (!formData.phone) newErrors.phone = 'El teléfono es requerido';
-      if (!formData.vehicleType) newErrors.vehicleType = 'Selecciona tu tipo de vehículo';
+  
+      if (!formData.cedula) newErrors.phone = 'El teléfono es requerido';
+
       if (!formData.acceptTerms) newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
       
       if (formData.password !== formData.confirmPassword) {
@@ -60,113 +62,38 @@ export function AuthPages({ view, onViewChange, onLogin }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit  =  async  (e) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Simular login exitoso
+
       const userData = {
-        id: '1',
         email: formData.email,
-        firstName: formData.firstName || 'Usuario',
-        lastName: formData.lastName || 'Demo',
-        vehicleType: formData.vehicleType || 'scooter',
-        membershipNumber: formData.membershipNumber || 'RP2024001'
+        cedula: formData.cedula,
+        password: formData.password,
+        fechaNacimiento: formData.birthdate
       };
       
-      onLogin(userData);
-      onViewChange('dashboard');
+   try{
+
+   const registerResponse = await axios.post(API, userData);
+    const { token } = registerResponse.data;
+    console.log(token)
+    localStorage.setItem('authToken', token);
+
+    }catch(e){
+      console.log(e)
+    }
     }
   };
 
-  if (view === 'login') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <Button
-            variant="ghost"
-            onClick={() => onViewChange('landing')}
-            className="mb-6"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver al inicio
-          </Button>
-          
-          <Card>
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white font-bold text-xl">RP</span>
-              </div>
-              <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-              <p className="text-gray-600">Accede a tu cuenta de Rola PET</p>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="tu@email.com"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" />
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    placeholder="••••••••"
-                  />
-                  {errors.password && (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" />
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-                
-                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                  Iniciar Sesión
-                </Button>
-                
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    ¿No tienes cuenta?{' '}
-                    <button
-                      type="button"
-                      onClick={() => onViewChange('register')}
-                      className="text-green-600 hover:underline"
-                    >
-                      Regístrate aquí
-                    </button>
-                  </p>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <Button
           variant="ghost"
-          onClick={() => onViewChange('landing')}
+          onClick={() => navigate('/')}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -185,37 +112,7 @@ export function AuthPages({ view, onViewChange, onLogin }) {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Nombre</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    placeholder="Tu nombre"
-                  />
-                  {errors.firstName && (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" />
-                      {errors.firstName}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Apellido</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    placeholder="Tu apellido"
-                  />
-                  {errors.lastName && (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" />
-                      {errors.lastName}
-                    </p>
-                  )}
-                </div>
+
               </div>
               
               <div className="space-y-2">
@@ -236,51 +133,31 @@ export function AuthPages({ view, onViewChange, onLogin }) {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
+                <Label htmlFor="cedula">numero de identificacion</Label>
                 <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="+57 300 123 4567"
+                  id="cedula"
+                  value={formData.cedula}
+                  onChange={(e) => handleInputChange('cedula', e.target.value)}
+                  placeholder="123456789"
                 />
-                {errors.phone && (
+                {errors.cedula && (
                   <p className="text-sm text-red-600 flex items-center">
                     <AlertCircle className="w-4 h-4 mr-1" />
-                    {errors.phone}
+                    {errors.cedula}
                   </p>
                 )}
               </div>
-              
               <div className="space-y-2">
-                <Label htmlFor="vehicleType">Tipo de Vehículo</Label>
-                <Select onValueChange={(value) => handleInputChange('vehicleType', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu vehículo principal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="scooter">Scooter Eléctrico</SelectItem>
-                    <SelectItem value="bicycle">Bicicleta Eléctrica</SelectItem>
-                    <SelectItem value="motorcycle">Moto Eléctrica</SelectItem>
-                    <SelectItem value="multiple">Múltiples Vehículos</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.vehicleType && (
-                  <p className="text-sm text-red-600 flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-1" />
-                    {errors.vehicleType}
-                  </p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="membershipNumber">Número de Membresía (Opcional)</Label>
-                <Input
-                  id="membershipNumber"
-                  value={formData.membershipNumber}
-                  onChange={(e) => handleInputChange('membershipNumber', e.target.value)}
-                  placeholder="RP2024XXX"
-                />
-              </div>
+  <Label htmlFor="birthdate">Fecha de nacimiento</Label>
+  <Input
+    id="birthdate"
+    type="date"
+    value={formData.birthdate}
+    onChange={(e) => handleInputChange('birthdate', e.target.value)}
+    // opcional: evitar fechas futuras
+    max={new Date().toISOString().split('T')[0]}
+  />
+</div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -342,7 +219,7 @@ export function AuthPages({ view, onViewChange, onLogin }) {
                 </p>
               )}
               
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+              <Button type="submit" onClick={() => navigate('/profileData')} className="w-full bg-green-600 hover:bg-green-700">
                 Crear Cuenta
               </Button>
               
@@ -351,7 +228,7 @@ export function AuthPages({ view, onViewChange, onLogin }) {
                   ¿Ya tienes cuenta?{' '}
                   <button
                     type="button"
-                    onClick={() => onViewChange('login')}
+                    onClick={() => navigate('/login')}
                     className="text-green-600 hover:underline"
                   >
                     Inicia sesión aquí
