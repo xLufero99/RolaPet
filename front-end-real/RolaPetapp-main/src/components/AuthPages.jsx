@@ -5,11 +5,27 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
-const API = "http://localhost:8081/api/v1/auth/register"
+const API = "http://localhost:8081/api/v1/auth/register";
+
+// 👉 función pura para saber si es menor de 14 (sin useEffect)
+function isUserUnder14(birthdateStr) {
+  if (!birthdateStr) return false;
+
+  const birth = new Date(birthdateStr);
+  if (isNaN(birth.getTime())) return false;
+
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age < 14;
+}
 
 export function AuthPages({ view }) {
   const navigate = useNavigate();
@@ -19,11 +35,11 @@ export function AuthPages({ view }) {
     confirmPassword: '',
     cedula: '',
     acceptTerms: false,
-    birthdate: ''
+    birthdate: '',
+    nombreAcudiente: '',   // 👈 nuevo campo
   });
 
   const [errors, setErrors] = useState({});
-
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -47,15 +63,26 @@ export function AuthPages({ view }) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
-    if (view === 'register') {
-  
-      if (!formData.cedula) newErrors.phone = 'El teléfono es requerido';
+    if (!formData.birthdate) {
+      newErrors.birthdate = 'La fecha de nacimiento es requerida';
+    }
 
-      if (!formData.acceptTerms) newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
+    if (view === 'register') {
+      if (!formData.cedula) newErrors.cedula = 'El número de identificación es requerido';
+
+      if (!formData.acceptTerms) {
+        newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
+      }
       
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Las contraseñas no coinciden';
       }
+    }
+
+    // ⚠️ Si es menor de 14, exigir nombre del acudiente
+    const under14 = isUserUnder14(formData.birthdate);
+    if (under14 && !formData.nombreAcudiente.trim()) {
+      newErrors.nombreAcudiente = 'Si eres menor de 14 años, debes ingresar el nombre de tu acudiente';
     }
 
     setErrors(newErrors);
@@ -65,30 +92,32 @@ export function AuthPages({ view }) {
   const handleSubmit  =  async  (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
+    if (!validateForm()) return;
 
-      const userData = {
-        email: formData.email,
-        cedula: formData.cedula,
-        password: formData.password,
-        fechaNacimiento: formData.birthdate
-      };
+    const userData = {
+      email: formData.email,
+      cedula: formData.cedula,
+      password: formData.password,
+      fechaNacimiento: formData.birthdate,
+      // si quieres mandar el acudiente también al backend:
+      nombreAcudiente: formData.nombreAcudiente || null,
+    };
       
-   try{
-
-   const registerResponse = await axios.post(API, userData);
-    const { token } = registerResponse.data;
-    console.log(token)
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('cedula', userData.cedula);
+    try {
+      const registerResponse = await axios.post(API, userData);
+      const { token } = registerResponse.data;
+      console.log(token);
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('cedula', userData.cedula);
       localStorage.setItem('birthdate', userData.fechaNacimiento);
 
-    }catch(e){
-      console.log(e)
-    }
+      navigate('/profileData');
+    } catch (e) {
+      console.log(e);
     }
   };
 
+  const isUnder14 = isUserUnder14(formData.birthdate);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
@@ -113,10 +142,6 @@ export function AuthPages({ view }) {
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              </div>
-              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -135,7 +160,7 @@ export function AuthPages({ view }) {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="cedula">numero de identificacion</Label>
+                <Label htmlFor="cedula">Número de identificación</Label>
                 <Input
                   id="cedula"
                   value={formData.cedula}
@@ -149,17 +174,43 @@ export function AuthPages({ view }) {
                   </p>
                 )}
               </div>
+
               <div className="space-y-2">
-  <Label htmlFor="birthdate">Fecha de nacimiento</Label>
-  <Input
-    id="birthdate"
-    type="date"
-    value={formData.birthdate}
-    onChange={(e) => handleInputChange('birthdate', e.target.value)}
-    // opcional: evitar fechas futuras
-    max={new Date().toISOString().split('T')[0]}
-  />
-</div>
+                <Label htmlFor="birthdate">Fecha de nacimiento</Label>
+                <Input
+                  id="birthdate"
+                  type="date"
+                  value={formData.birthdate}
+                  onChange={(e) => handleInputChange('birthdate', e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                />
+                {errors.birthdate && (
+                  <p className="text-sm text-red-600 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" />
+                    {errors.birthdate}
+                  </p>
+                )}
+              </div>
+
+              {/* 👇 Campo extra solo si es menor de 14 años */}
+              {isUnder14 && (
+                <div className="space-y-2">
+                  <Label htmlFor="nombreAcudiente">Nombre del acudiente</Label>
+                  <Input
+                    id="nombreAcudiente"
+                    type="text"
+                    value={formData.nombreAcudiente}
+                    onChange={(e) => handleInputChange('nombreAcudiente', e.target.value)}
+                    placeholder="Nombre completo del acudiente"
+                  />
+                  {errors.nombreAcudiente && (
+                    <p className="text-sm text-red-600 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {errors.nombreAcudiente}
+                    </p>
+                  )}
+                </div>
+              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -201,7 +252,7 @@ export function AuthPages({ view }) {
                 <Checkbox
                   id="acceptTerms"
                   checked={formData.acceptTerms}
-                  onCheckedChange={(checked) => handleInputChange('acceptTerms', checked)}
+                  onCheckedChange={(checked) => handleInputChange('acceptTerms', !!checked)}
                 />
                 <Label htmlFor="acceptTerms" className="text-sm">
                   Acepto los{' '}
@@ -221,7 +272,11 @@ export function AuthPages({ view }) {
                 </p>
               )}
               
-              <Button type="submit" onClick={() => navigate('/profileData')} className="w-full bg-green-600 hover:bg-green-700">
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={() => navigate('/profileData')}
+              >
                 Crear Cuenta
               </Button>
               
