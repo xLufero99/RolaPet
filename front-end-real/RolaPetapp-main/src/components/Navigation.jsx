@@ -1,26 +1,36 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 import { Menu, MapPin, ShoppingBag, Users, Star, User, Home, LogOut, Shield } from 'lucide-react';
 
-export function Navigation({ currentView, onViewChange, isAuthenticated, onLogout, isAdmin }) {
+export function Navigation({ isAuthenticated, onLogout, isAdmin }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Menú según autenticación
   const menuItems = isAuthenticated 
     ? [
-        { id: 'dashboard', label: 'Inicio', icon: Home },
-        { id: 'map', label: 'Mapa y Rutas', icon: MapPin },
-        { id: 'marketplace', label: 'Marketplace', icon: ShoppingBag },
-        { id: 'social', label: 'Social', icon: Users },
-        { id: 'profile', label: 'Mi Perfil', icon: User },
-        { id: 'reviews', label: 'Calificaciones', icon: Star },
-        ...(isAdmin ? [{ id: 'admin', label: 'Administración', icon: Shield }] : [])
+        { path: '/dashboard', label: 'Inicio', icon: Home },
+        { path: '/map', label: 'Mapa y Rutas', icon: MapPin },
+        { path: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
+        { path: '/social', label: 'Social', icon: Users },
+        { path: '/profile', label: 'Mi Perfil', icon: User },
+        { path: '/reviews', label: 'Calificaciones', icon: Star },
+        ...(isAdmin ? [{ path: '/admin', label: 'Administración', icon: Shield }] : []),
       ]
     : [
-        { id: 'landing', label: 'Inicio', icon: Home },
+        { path: '/', label: 'Inicio', icon: Home },
       ];
+
+  const handleNav = (path) => {
+    navigate(path);
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
@@ -37,12 +47,13 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onLogou
         <div className="hidden md:flex items-center space-x-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <button
-                key={item.id}
-                onClick={() => onViewChange(item.id)}
+                key={item.path}
+                onClick={() => handleNav(item.path)}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                  currentView === item.id
+                  isActive
                     ? 'bg-green-100 text-green-700'
                     : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                 }`}
@@ -81,12 +92,13 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onLogou
               <div className="flex flex-col space-y-4 mt-8">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
                   return (
                     <button
-                      key={item.id}
-                      onClick={() => onViewChange(item.id)}
+                      key={item.path}
+                      onClick={() => handleNav(item.path)}
                       className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-left ${
-                        currentView === item.id
+                        isActive
                           ? 'bg-green-100 text-green-700'
                           : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                       }`}

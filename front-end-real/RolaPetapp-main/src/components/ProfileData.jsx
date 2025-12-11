@@ -183,7 +183,7 @@ export function ProfileData() {
                 </div>
               </div>
 
-              <Button type="submit" onClick={() => navigate('/profile')} className="w-full bg-green-600 hover:bg-green-700">
+              <Button type="submit" onClick={() => navigate('/dashboard')} className="w-full bg-green-600 hover:bg-green-700">
                 Guardar perfil
               </Button>
             </form>
