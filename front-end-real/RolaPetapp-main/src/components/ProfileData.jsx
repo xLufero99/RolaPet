@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchUserProfile } from "../profile-api"; // 👈 aquí está tu función de perfil
+//import { fetchUserProfile } from "../profile-api"; // 👈 aquí está tu función de perfil
 import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -9,20 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
 const API = "http://localhost:8082/users/profile";
-
+const identificationLocal = localStorage.getItem("cedula");
+const birthdateLocal = localStorage.getItem("birthdate");
 export function ProfileData() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    identification: '',
     phone: '',
     address: '',
     documentType: ''
   });
 
   const [errors, setErrors] = useState({});
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [apiError, setApiError] = useState('');
+  //const [loadingProfile, setLoadingProfile] = useState(true);
+  //const [apiError, setApiError] = useState('');
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -44,30 +44,18 @@ export function ProfileData() {
   };
 
   // 🔹 Traer perfil al montar el componente
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const profile = await fetchUserProfile(); // 👈 llamada a tu API protegida
-      console.log(profile)
-      } catch (err) {
-        console.error(err);
-        setApiError('No se pudo cargar tu perfil. Intenta de nuevo más tarde.');
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
 
-    loadProfile();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(birthdateLocal)
     
     if (!validateForm()) return;
 
     const userData = {
       name: formData.name,
-      identification: formData.identification,
+    identification: identificationLocal,
+    birthdate: birthdateLocal,
       phone: formData.phone,
       address: formData.address,
       documentType: formData.documentType
@@ -90,13 +78,13 @@ export function ProfileData() {
     }
   };
 
-  if (loadingProfile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Cargando tu perfil...</p>
-      </div>
-    );
-  }
+  //if (loadingProfile) {
+    //return (
+     // <div className="min-h-screen flex items-center justify-center">
+      //  <p>Cargando tu perfil...</p>
+      //</div>
+    //);
+ // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
@@ -119,12 +107,7 @@ export function ProfileData() {
           </CardHeader>
           
           <CardContent>
-            {apiError && (
-              <p className="mb-4 text-sm text-red-600 flex items-center">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {apiError}
-              </p>
-            )}
+          
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">

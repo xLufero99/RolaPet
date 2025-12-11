@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -20,6 +21,7 @@ import {
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export function Dashboard({ user, onViewChange }) {
+    const navigate = useNavigate();
   // Verificar si el usuario es administrador
   const isAdmin = user?.email === 'admin@rolapet.com' || user?.role === 'admin';
 
@@ -107,7 +109,7 @@ export function Dashboard({ user, onViewChange }) {
       title: 'Mi Perfil',
       description: 'Actualiza tu información',
       icon: Users,
-      action: () => onViewChange('profile'),
+      action: () => navigate('/profile'),
       color: 'bg-orange-100 text-orange-700 hover:bg-orange-200'
     }
   ];

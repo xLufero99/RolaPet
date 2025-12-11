@@ -80,6 +80,8 @@ export function AuthPages({ view }) {
     const { token } = registerResponse.data;
     console.log(token)
     localStorage.setItem('authToken', token);
+    localStorage.setItem('cedula', userData.cedula);
+      localStorage.setItem('birthdate', userData.fechaNacimiento);
 
     }catch(e){
       console.log(e)

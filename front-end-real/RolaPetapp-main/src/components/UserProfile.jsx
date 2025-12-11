@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchUserProfile } from "../profile-api";
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -22,19 +23,22 @@ import {
   Heart
 } from 'lucide-react';
 
-export function UserProfile({ user}) {
+export function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: '+57 300 123 4567',
-    vehicleType: user?.vehicleType || 'scooter',
-    bio: 'Amante de la movilidad sostenible en Bogotá 🚲⚡',
+    name: '',
+    email: '',
+    phone: '+',
+    vehicleType: 'scooter',
+    adress: '',
     location: 'Bogotá, Colombia',
-    membershipNumber: user?.membershipNumber || 'RP2024001'
+    membershipNumber: '',
+    bio: ''
   });
+
+  const [loading, setLoading] = useState(true);
 
   const stats = [
     { label: 'Rutas Completadas', value: '127', icon: MapPin, color: 'text-green-600' },
@@ -112,7 +116,7 @@ export function UserProfile({ user}) {
   };
 
   const handleSave = () => {
-    // Aquí iría la lógica para guardar los cambios
+    // Aquí iría la lógica para guardar los cambios (PUT/PATCH al backend)
     setIsEditing(false);
   };
 
@@ -134,6 +138,52 @@ export function UserProfile({ user}) {
       default: return <User className="w-4 h-4 text-gray-600" />;
     }
   };
+
+  // 👉 Traer el perfil del backend y llenar formData
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await fetchUserProfile();
+        // Ajusta estos nombres a lo que devuelva tu backend
+        setFormData(prev => ({
+          ...prev,
+          name: profile.name || '',
+          email: profile.authUserId || '',
+          phone: profile.phone || '+',
+          vehicleType: '',
+          adress: profile.address || '',
+          location: 'Bogotá, Colombia',
+         
+          
+        }));
+      } catch (err) {
+        console.error("Error cargando perfil:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  // Iniciales para el avatar a partir del nombre
+  const initials = formData.name
+    ? formData.name
+        .split(' ')
+        .filter(Boolean)
+        .map(p => p[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : 'RP';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Cargando perfil...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -191,7 +241,7 @@ export function UserProfile({ user}) {
                 <div className="relative inline-block mb-4">
                   <Avatar className="w-24 h-24 mx-auto">
                     <AvatarFallback className="text-2xl">
-                      {formData.firstName[0]}{formData.lastName[0]}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -204,28 +254,25 @@ export function UserProfile({ user}) {
                 </div>
                 
                 <h2 className="text-xl font-bold mb-1">
-                  {formData.firstName} {formData.lastName}
+                  {formData.name || 'Usuario Rola PET'}
                 </h2>
-                <p className="text-gray-600 mb-2">@{formData.firstName.toLowerCase()}_rides</p>
+                <p className="text-gray-600 mb-2">{formData.email}</p>
                 
                 <div className="flex items-center justify-center space-x-2 mb-3">
                   <span className="text-2xl">{getVehicleIcon(formData.vehicleType)}</span>
-                  <Badge className="bg-green-100 text-green-700">
-                    Miembro {formData.membershipNumber}
-                  </Badge>
+                  
                 </div>
                 
-                <p className="text-sm text-gray-600 mb-4">{formData.bio}</p>
+                {formData.bio && (
+                  <p className="text-sm text-gray-600 mb-4">{formData.bio}</p>
+                )}
                 
                 <div className="flex items-center justify-center space-x-1 text-sm text-gray-600 mb-4">
                   <MapPin className="w-4 h-4" />
                   <span>{formData.location}</span>
                 </div>
                 
-                <div className="flex items-center justify-center space-x-1 text-sm text-gray-600 mb-6">
-                  <Calendar className="w-4 h-4" />
-                  <span>Miembro desde Nov 2023</span>
-                </div>
+               
 
                 {!isEditing ? (
                   <Button 
@@ -292,19 +339,20 @@ export function UserProfile({ user}) {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="firstName">Nombre</Label>
+                          <Label htmlFor="name">Nombre</Label>
                           <Input
-                            id="firstName"
-                            value={formData.firstName}
-                            onChange={(e) => handleInputChange('firstName', e.target.value)}
+                            id="name"
+                            value={formData.name}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
                           />
                         </div>
+                        
                         <div className="space-y-2">
-                          <Label htmlFor="lastName">Apellido</Label>
+                          <Label htmlFor="location">Ubicación</Label>
                           <Input
-                            id="lastName"
-                            value={formData.lastName}
-                            onChange={(e) => handleInputChange('lastName', e.target.value)}
+                            id="location"
+                            value={formData.location}
+                            onChange={(e) => handleInputChange('location', e.target.value)}
                           />
                         </div>
                       </div>
@@ -327,12 +375,24 @@ export function UserProfile({ user}) {
                           onChange={(e) => handleInputChange('phone', e.target.value)}
                         />
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="adress">Dirección</Label>
+                        <Input
+                          id="adress"
+                          value={formData.adress}
+                          onChange={(e) => handleInputChange('adress', e.target.value)}
+                        />
+                      </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor="vehicleType">Vehículo Principal</Label>
-                        <Select onValueChange={(value) => handleInputChange('vehicleType', value)}>
+                        <Select
+                          value={formData.vehicleType}
+                          onValueChange={(value) => handleInputChange('vehicleType', value)}
+                        >
                           <SelectTrigger>
-                            <SelectValue placeholder={formData.vehicleType} />
+                            <SelectValue placeholder="Selecciona un vehículo" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="scooter">Scooter Eléctrico</SelectItem>
@@ -341,14 +401,14 @@ export function UserProfile({ user}) {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <Label htmlFor="bio">Biografía</Label>
+                        <Label htmlFor="bio">Bio</Label>
                         <Input
                           id="bio"
                           value={formData.bio}
                           onChange={(e) => handleInputChange('bio', e.target.value)}
-                          placeholder="Cuéntanos sobre ti..."
+                          placeholder="Cuéntale algo a la comunidad sobre ti"
                         />
                       </div>
                     </CardContent>
